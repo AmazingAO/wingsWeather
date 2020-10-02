@@ -178,8 +178,12 @@ public class ChooseAreaFragment extends Fragment {
         countyList = LitePal.where("cityid = ?",String.valueOf(selectedCity.getId())).find(County.class);
         if (countyList.size()>0){
             dataList.clear();
-            for (County county : countyList){
-                dataList.add(county.getCountyName());
+//            countyList.remove(0);
+//            for (County county : countyList){
+//                dataList.add(county.getCountyName());
+//            }
+            for (int i = 1;i<countyList.size();i++){
+                dataList.add(countyList.get(i).getCountyName());
             }
             adapter.notifyDataSetChanged();
             listView.setSelection(0);
