@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<litepal>
+<!--    数据库名字-->
+    <dbname value = "cool_weather"/>
+<!--   版本号 -->
+    <version value="1"/>
+<!--    数据库绑定的对应映射类-->
+    <list>
+<!--        每一个映射类，对应数据库都是一张表！-->
+        <mapping class="com.example.wings_weather.db.Province"/>
+        <mapping class="com.example.wings_weather.db.City"/>
+        <mapping class="com.example.wings_weather.db.County"/>
+    </list>
+</litepal>
