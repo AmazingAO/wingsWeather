@@ -1,10 +1,13 @@
 package com.example.wings_weather.util;
 
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.example.wings_weather.db.City;
 import com.example.wings_weather.db.County;
 import com.example.wings_weather.db.Province;
+import com.example.wings_weather.gson.Weather;
+import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -80,4 +83,19 @@ public class Utility {
         return false;
     }
 
+    /**
+     * 将返回的JSON数据解析成Weather实体类
+     */
+    public static Weather handleWeatherResponse(String response){
+        try{
+            JSONObject jsonObject = new JSONObject(response);
+            JSONArray jsonArray = jsonObject.getJSONArray("HeWeather");
+            String weatherContent = jsonArray.getJSONObject(0).toString();
+            Log.d("error",weatherContent);
+            return new Gson().fromJson(weatherContent,Weather.class);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

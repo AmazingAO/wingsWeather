@@ -1,6 +1,7 @@
 package com.example.wings_weather;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -108,6 +109,12 @@ public class ChooseAreaFragment extends Fragment {
                 {
                     selectedCity = cityList.get(position);//获取当前按下的是哪个市
                     queryCounties();//查询对应的县
+                }else if (currentLevel == LEVEL_COUNTY){
+                    String weatherId = countyList.get(position).getWeatherId();
+                    Intent intent = new Intent(getActivity(),WeatherActivity.class);
+                    intent.putExtra("weather_id",weatherId);
+                    startActivity(intent);
+                    getActivity().finish();
                 }
             }
         });
