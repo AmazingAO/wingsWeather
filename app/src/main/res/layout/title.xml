@@ -3,6 +3,18 @@
     android:layout_width="match_parent"
     android:layout_height="?attr/actionBarSize">
 
+    <Button
+        android:id="@+id/nav_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:text="Home"
+        android:textAllCaps="false"
+        android:background="#8000"
+        android:textColor="#fff"
+        />
     <TextView
         android:id="@+id/title_city"
         android:layout_width="wrap_content"

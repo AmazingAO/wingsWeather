@@ -111,10 +111,17 @@ public class ChooseAreaFragment extends Fragment {
                     queryCounties();//查询对应的县
                 }else if (currentLevel == LEVEL_COUNTY){
                     String weatherId = countyList.get(position).getWeatherId();
+                    if (getActivity() instanceof MainActivity){
                     Intent intent = new Intent(getActivity(),WeatherActivity.class);
                     intent.putExtra("weather_id",weatherId);
                     startActivity(intent);
-                    getActivity().finish();
+                    getActivity().finish();}
+                    else if (getActivity() instanceof  WeatherActivity){
+                        WeatherActivity activity = (WeatherActivity)getActivity();
+                        activity.drawerLayout.closeDrawers();
+                        activity.swipeRefreshLayout.setRefreshing(true);
+                        activity.requestWeather(weatherId);
+                    }
                 }
             }
         });
@@ -185,13 +192,13 @@ public class ChooseAreaFragment extends Fragment {
         countyList = LitePal.where("cityid = ?",String.valueOf(selectedCity.getId())).find(County.class);
         if (countyList.size()>0){
             dataList.clear();
-//            countyList.remove(0);
-//            for (County county : countyList){
-//                dataList.add(county.getCountyName());
-//            }
-            for (int i = 1;i<countyList.size();i++){
-                dataList.add(countyList.get(i).getCountyName());
+            countyList.remove(0);
+            for (County county : countyList){
+                dataList.add(county.getCountyName());
             }
+//            for (int i = 1;i<countyList.size();i++){
+//                dataList.add(countyList.get(i).getCountyName());
+//            }
             adapter.notifyDataSetChanged();
             listView.setSelection(0);
             currentLevel = LEVEL_COUNTY;
