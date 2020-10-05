@@ -29,7 +29,9 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.wings_weather.gson.Forecast;
 import com.example.wings_weather.gson.Weather;
+import com.example.wings_weather.gson.date_2_0.Now;
 import com.example.wings_weather.gson.date_2_0.Weather_Live;
+import com.example.wings_weather.gson.date_2_0.Weather_day3;
 import com.example.wings_weather.util.HttpUtil;
 import com.example.wings_weather.util.Utility;
 
@@ -137,13 +139,16 @@ public class WeatherActivity extends AppCompatActivity {
 
         String weatherString = pref.getString("weather",null);
         String weatherString_Live = pref.getString("weather_Live",null);
+        String weatherString_3_Live = pref.getString("weather_Live_day3",null);
 
-        if (weatherString != null && weatherString_Live!=null){//将每次请求的JSON 数据缓存在本地 SharedPreferences 文件中
+        if (weatherString != null && weatherString_Live!=null&&weatherString_3_Live!=null){//将每次请求的JSON 数据缓存在本地 SharedPreferences 文件中
             Weather weather = Utility.handleWeatherResponse(weatherString);
             Weather_Live weather_Live = Utility.handleWeather_LiveResponse(weatherString_Live);
+            Weather_day3 weather_day3 = Utility.handleWeatherDay3_LiveResponse(weatherString_3_Live);
             mWeatherId = weather.basic.weatherId;
             showWeatherInfo(weather);
             showWeather_Live_Info(weather_Live);
+            showWeatherDay3_Live_Info(weather_day3);
         }else {
             mWeatherId = getIntent().getStringExtra("weather_id");
             weatherLayout.setVisibility(View.INVISIBLE);//请求数据时先将其内容展示隐藏.
@@ -157,6 +162,50 @@ public class WeatherActivity extends AppCompatActivity {
             }
         });
     }
+
+    /**
+     * 请求未来3天实况信息
+     */
+    public void  requestWeatherDay3_Live(final String weatherId){
+        final String weather_live_Url = "https://devapi.heweather.net/v7/weather/3d?location="+weatherId+"&key=97ab95ea5401408e8a43d3dfec8db005";
+        HttpUtil.sendOkHttpRequest(weather_live_Url, new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                e.printStackTrace();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(WeatherActivity.this,"on day3  failure 获取天气信息失败",Toast.LENGTH_SHORT).show();
+                        swipeRefreshLayout.setRefreshing(false);//关闭下拉刷新.
+                    }
+                });
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                final String responseText = response.body().string(); //获取请求体
+                final Weather_day3 weather_day3 = Utility.handleWeatherDay3_LiveResponse(responseText);//使用GSON 将JSON解析为对应的数据类
+//                Log.d("werror",weather_day3.daily.toString());
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (weather_day3!= null){
+                            SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this).edit();
+                            //获取SharedPreferences的Editor类将请求回来的数据缓存在本地.
+
+                            editor.putString("weather_Live_day3",responseText);
+                            editor.apply();
+                            showWeatherDay3_Live_Info(weather_day3);
+                        }else {
+                            Toast.makeText(WeatherActivity.this,"else 获取天气信息失败",Toast.LENGTH_SHORT).show();
+                        }
+                        swipeRefreshLayout.setRefreshing(false);//关闭下拉刷新
+                    }
+                });
+            }
+        });
+    }
+
     /**
      * 请求和天气的实况信息
      */
@@ -187,9 +236,9 @@ public class WeatherActivity extends AppCompatActivity {
                         if (weather_live!= null){
                             SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this).edit();
                             //获取SharedPreferences的Editor类将请求回来的数据缓存在本地.
-
                             editor.putString("weather_Live",responseText);
                             editor.apply();
+                            requestWeatherDay3_Live(weatherId);
                             showWeather_Live_Info(weather_live);
                         }else {
 //                            Log.d("error",weather.code);
@@ -260,23 +309,10 @@ public class WeatherActivity extends AppCompatActivity {
         titleUpdateTime.setText(updateTime);
 //        degreeText.setText(degree);
 //        weatherInfoText.setText(weatherInfo);
-        forecastLayout.removeAllViews();
+//        forecastLayout.removeAllViews();
         if (weather == null)
             Log.d("weather_error",null);
 
-        for (Forecast forecast : weather.forecastList){
-            View view = LayoutInflater.from(this).inflate(R.layout.forecast_item,forecastLayout,false);
-            TextView dateText = (TextView)view.findViewById(R.id.date_text);
-            TextView infoText = (TextView)view.findViewById(R.id.info_text);
-            TextView maxText = (TextView)view.findViewById(R.id.max_text);
-            TextView minText = (TextView)view.findViewById(R.id.min_text);
-
-            dateText.setText(forecast.date);
-            infoText.setText(forecast.more.info);
-            maxText.setText(forecast.temperature.max);
-            minText.setText(forecast.temperature.min);
-            forecastLayout.addView(view);
-        }
         if (weather.aqi!=null){
             aqiText.setText(weather.aqi.city.aqi);
             pm25Text.setText(weather.aqi.city.pm25);
@@ -298,6 +334,27 @@ public class WeatherActivity extends AppCompatActivity {
         String weatherInfo =weather.describe_text;
         degreeText.setText(degree);
         weatherInfoText.setText(weatherInfo);
+    }
+
+    /**
+     * 显示3未来三天数据
+     */
+    private void showWeatherDay3_Live_Info(Weather_day3 weather){
+        forecastLayout.removeAllViews();
+
+        for (Now forecast : weather.daily){
+            View view = LayoutInflater.from(this).inflate(R.layout.forecast_item,forecastLayout,false);
+            TextView dateText = (TextView)view.findViewById(R.id.date_text);
+            TextView infoText = (TextView)view.findViewById(R.id.info_text);
+            TextView maxText = (TextView)view.findViewById(R.id.max_text);
+            TextView minText = (TextView)view.findViewById(R.id.min_text);
+
+            dateText.setText(forecast.fxDate);
+            infoText.setText(forecast.textDay);
+            maxText.setText(forecast.tempMax);
+            minText.setText(forecast.tempmin);
+            forecastLayout.addView(view);
+        }
         weatherLayout.setVisibility(View.VISIBLE);//展示内容
         swipeRefreshLayout.setRefreshing(false);//关闭下拉刷新.
         Intent intent = new Intent(this,AutoUpdateService.class);

@@ -8,6 +8,7 @@ import com.example.wings_weather.db.County;
 import com.example.wings_weather.db.Province;
 import com.example.wings_weather.gson.Weather;
 import com.example.wings_weather.gson.date_2_0.Weather_Live;
+import com.example.wings_weather.gson.date_2_0.Weather_day3;
 import com.google.gson.Gson;
 
 import org.json.JSONArray;
@@ -106,17 +107,30 @@ public class Utility {
     public static Weather_Live handleWeather_LiveResponse(String response){
         try{
             JSONObject jsonObject = new JSONObject(response);
-            Log.d("werror",jsonObject.toString());
             String code  = jsonObject.getString("code");
-            Log.d("werror",code);
             if (!code.equals("200")){
                 return  null;
             }
             String weather_now  = jsonObject.getString("now");
-            Log.d("werror",weather_now);
-            Weather_Live weather_live = new Gson().fromJson(weather_now,Weather_Live.class);
-            Log.d("werror",weather_live.toString());
-            return weather_live;
+            return new Gson().fromJson(weather_now,Weather_Live.class);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * 解析未来3天实况信息将JSON 转为 Weather_day3类
+     */
+    public static Weather_day3 handleWeatherDay3_LiveResponse(String response){
+        try{
+            JSONObject jsonObject = new JSONObject(response);
+            String code  = jsonObject.getString("code");
+            if (!code.equals("200")){
+                return  null;
+            }
+            Weather_day3 weather_day3 = new Gson().fromJson(response,Weather_day3.class);
+            return  weather_day3;
         }catch (Exception e){
             e.printStackTrace();
         }

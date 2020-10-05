@@ -1,60 +1,58 @@
 package com.example.wings_weather.gson.date_2_0;
-
-import com.google.gson.annotations.SerializedName;
-
 public class Now {
-    @SerializedName("obsTime")
-    public String now_Time; //实况观测天气
-
-    @SerializedName("temp")
-    public String now_temp; //实况温度
-
-    @SerializedName("feelsLike")
-    public String feels_temp;//实况体感温度
-
-    public String icon;//当前天气图标
+    public String fxDate;
+    public String sunrise;
+    public String sunset;
+    public String moonrise;
+    public String moonset;
+    public String tempMax;
+    public String tempmin;
+    public String iconDay;
+    public String textDay;
+    public String iconNight;
+    public String textNight;
+    public String wind360Day;
+    public String windDirDay;
+    public String windScaleDay;
+    public String windSpeedDay;
+    public String wind360Night;
+    public String windDirNight;
+    public String windScaleNight;
+    public String windSpeedNight;
+    public String humidity;
+    public String precip;
+    public String pressure;
+    public String vis;
+    public String uvIndex;
 
     @Override
     public String toString() {
-        return "Now{" +
-                "now_Time='" + now_Time + '\'' +
-                ", now_temp='" + now_temp + '\'' +
-                ", feels_temp='" + feels_temp + '\'' +
-                ", icon='" + icon + '\'' +
-                ", describe_text='" + describe_text + '\'' +
-                ", wind360='" + wind360 + '\'' +
-                ", windDir='" + windDir + '\'' +
-                ", windScale='" + windScale + '\'' +
-                ", windSpeed='" + windSpeed + '\'' +
+        return "Weather_day3{" +
+                "fxDate='" + fxDate + '\'' +
+                ", sunrise='" + sunrise + '\'' +
+                ", sunset='" + sunset + '\'' +
+                ", moonrise='" + moonrise + '\'' +
+                ", moonset='" + moonset + '\'' +
+                ", tempMax='" + tempMax + '\'' +
+                ", tempmin='" + tempmin + '\'' +
+                ", iconDay='" + iconDay + '\'' +
+                ", textDay='" + textDay + '\'' +
+                ", iconNight='" + iconNight + '\'' +
+                ", textNight='" + textNight + '\'' +
+                ", wind360Day='" + wind360Day + '\'' +
+                ", windDirDay='" + windDirDay + '\'' +
+                ", windScaleDay='" + windScaleDay + '\'' +
+                ", windSpeedDay='" + windSpeedDay + '\'' +
+                ", wind360Night='" + wind360Night + '\'' +
+                ", windDirNight='" + windDirNight + '\'' +
+                ", windScaleNight='" + windScaleNight + '\'' +
+                ", windSpeedNight='" + windSpeedNight + '\'' +
                 ", humidity='" + humidity + '\'' +
                 ", precip='" + precip + '\'' +
                 ", pressure='" + pressure + '\'' +
                 ", vis='" + vis + '\'' +
-                ", cloud='" + cloud + '\'' +
-                ", dew='" + dew + '\'' +
+                ", uvIndex='" + uvIndex + '\'' +
                 '}';
     }
 
-    @SerializedName("text")
-    public String describe_text;//实况天气文字描述
-
-    public String wind360;//实况风向360角度
-
-    public String windDir;//实况风向
-
-    public String windScale;//实况风力等级
-
-    public String windSpeed;//实况风速
-
-    public String humidity;//实况相对湿度
-
-    public String precip;//实况降水量
-
-    public String pressure;//实况大气压强度
-
-    public  String vis;//实况能见度
-
-    public String cloud;//实况云量
-
-    public String dew;//实况露点温度
 }
