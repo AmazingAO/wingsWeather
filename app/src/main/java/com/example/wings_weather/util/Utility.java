@@ -7,6 +7,7 @@ import com.example.wings_weather.db.City;
 import com.example.wings_weather.db.County;
 import com.example.wings_weather.db.Province;
 import com.example.wings_weather.gson.Weather;
+import com.example.wings_weather.gson.date_2_0.Weather_Live;
 import com.google.gson.Gson;
 
 import org.json.JSONArray;
@@ -91,7 +92,31 @@ public class Utility {
             JSONObject jsonObject = new JSONObject(response);
             JSONArray jsonArray = jsonObject.getJSONArray("HeWeather");
             String weatherContent = jsonArray.getJSONObject(0).toString();
+            Log.d("werror",weatherContent);
             return new Gson().fromJson(weatherContent,Weather.class);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * 解析实况信息的JSON数据解析成Weather_Live类
+     */
+    public static Weather_Live handleWeather_LiveResponse(String response){
+        try{
+            JSONObject jsonObject = new JSONObject(response);
+            Log.d("werror",jsonObject.toString());
+            String code  = jsonObject.getString("code");
+            Log.d("werror",code);
+            if (!code.equals("200")){
+                return  null;
+            }
+            String weather_now  = jsonObject.getString("now");
+            Log.d("werror",weather_now);
+            Weather_Live weather_live = new Gson().fromJson(weather_now,Weather_Live.class);
+            Log.d("werror",weather_live.toString());
+            return weather_live;
         }catch (Exception e){
             e.printStackTrace();
         }

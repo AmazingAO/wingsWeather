@@ -1,10 +1,12 @@
 package com.example.wings_weather;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,6 +18,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.LongDef;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
@@ -26,6 +29,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.wings_weather.gson.Forecast;
 import com.example.wings_weather.gson.Weather;
+import com.example.wings_weather.gson.date_2_0.Weather_Live;
 import com.example.wings_weather.util.HttpUtil;
 import com.example.wings_weather.util.Utility;
 
@@ -39,6 +43,9 @@ import okhttp3.Callback;
 import okhttp3.Response;
 
 public class WeatherActivity extends AppCompatActivity {
+
+    private Handler mHandler = new Handler();
+
     private ScrollView weatherLayout;
 
     private TextView titleCity;
@@ -70,6 +77,10 @@ public class WeatherActivity extends AppCompatActivity {
     public DrawerLayout drawerLayout ;
 
     private Button navButton;
+
+
+
+    private int tag = 1;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -125,11 +136,14 @@ public class WeatherActivity extends AppCompatActivity {
 
 
         String weatherString = pref.getString("weather",null);
+        String weatherString_Live = pref.getString("weather_Live",null);
 
-        if (weatherString != null){//将每次请求的JSON 数据缓存在本地 SharedPreferences 文件中
+        if (weatherString != null && weatherString_Live!=null){//将每次请求的JSON 数据缓存在本地 SharedPreferences 文件中
             Weather weather = Utility.handleWeatherResponse(weatherString);
+            Weather_Live weather_Live = Utility.handleWeather_LiveResponse(weatherString_Live);
             mWeatherId = weather.basic.weatherId;
             showWeatherInfo(weather);
+            showWeather_Live_Info(weather_Live);
         }else {
             mWeatherId = getIntent().getStringExtra("weather_id");
             weatherLayout.setVisibility(View.INVISIBLE);//请求数据时先将其内容展示隐藏.
@@ -143,14 +157,58 @@ public class WeatherActivity extends AppCompatActivity {
             }
         });
     }
+    /**
+     * 请求和天气的实况信息
+     */
+    public void  requestWeather_Live(final String weatherId){
+        final String weather_live_Url = "https://devapi.heweather.net/v7/weather/now?location="+weatherId+"&key=97ab95ea5401408e8a43d3dfec8db005";
+        HttpUtil.sendOkHttpRequest(weather_live_Url, new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                e.printStackTrace();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Log.d("error","onFailure");
+                        Toast.makeText(WeatherActivity.this,"on failure 获取天气信息失败",Toast.LENGTH_SHORT).show();
+                        swipeRefreshLayout.setRefreshing(false);//关闭下拉刷新.
+                    }
+                });
+            }
 
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                final String responseText = response.body().string(); //获取请求体
+                final Weather_Live weather_live = Utility.handleWeather_LiveResponse(responseText);//使用GSON 将JSON解析为对应的数据类
+                Log.d("error",weather_live.toString());
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (weather_live!= null){
+                            SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this).edit();
+                            //获取SharedPreferences的Editor类将请求回来的数据缓存在本地.
+
+                            editor.putString("weather_Live",responseText);
+                            editor.apply();
+                            showWeather_Live_Info(weather_live);
+                        }else {
+//                            Log.d("error",weather.code);
+                            Log.d("error",weather_live == null ? "yes":"no");
+                            Toast.makeText(WeatherActivity.this,"else 获取天气信息失败",Toast.LENGTH_SHORT).show();
+                        }
+                        swipeRefreshLayout.setRefreshing(false);//关闭下拉刷新
+                    }
+                });
+            }
+        });
+    }
 
     /**
      * 根据天气id请求城市天气信息
      */
     public void requestWeather(final String weatherId){
-        final String weaterUrl = "http://guolin.tech/api/weather?cityid="+weatherId+"&KEY=ab56595ea238463b807452e13aac7394";
-        HttpUtil.sendOkHttpRequest(weaterUrl, new Callback() {
+        final String weatherUrl = "http://guolin.tech/api/weather?cityid="+weatherId+"&KEY=ab56595ea238463b807452e13aac7394";
+        HttpUtil.sendOkHttpRequest(weatherUrl, new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 e.printStackTrace();
@@ -177,12 +235,13 @@ public class WeatherActivity extends AppCompatActivity {
                             editor.putString("weather",responseText);
                             editor.apply();
                             mWeatherId  = weather.basic.weatherId;
+                            requestWeather_Live(weatherId);
                             showWeatherInfo(weather);
                         }else {
                             Log.d("error",weather == null ? "yes":"no");
                             Toast.makeText(WeatherActivity.this,"获取天气信息失败",Toast.LENGTH_SHORT).show();
                         }
-                        swipeRefreshLayout.setRefreshing(false);//关闭下拉刷新
+//                        swipeRefreshLayout.setRefreshing(false);//关闭下拉刷新
                     }
                 });
             }
@@ -195,14 +254,15 @@ public class WeatherActivity extends AppCompatActivity {
     private void showWeatherInfo(Weather weather){
         String cityName = weather.basic.cityName;
         String updateTime = weather.basic.update.updateTime.split(" ")[1];
-        String degree = weather.now.temperature+"℃";
-        String weatherInfo = weather.now.more.info;
+//        String degree = weather.now.temperature+"℃";
+//        String weatherInfo = weather.now.more.info;
         titleCity.setText(cityName);
         titleUpdateTime.setText(updateTime);
-        degreeText.setText(degree);
-        weatherInfoText.setText(weatherInfo);
+//        degreeText.setText(degree);
+//        weatherInfoText.setText(weatherInfo);
         forecastLayout.removeAllViews();
-
+        if (weather == null)
+            Log.d("weather_error",null);
 
         for (Forecast forecast : weather.forecastList){
             View view = LayoutInflater.from(this).inflate(R.layout.forecast_item,forecastLayout,false);
@@ -227,7 +287,19 @@ public class WeatherActivity extends AppCompatActivity {
         comfortText.setText(comfort);
         carWashText.setText(carWash);
         sportText.setText(sport);
+    }
+
+    /**
+     * 显示2.0版本数据
+     */
+
+    private void showWeather_Live_Info(Weather_Live weather){
+        String degree = weather.now_temp+"℃";
+        String weatherInfo =weather.describe_text;
+        degreeText.setText(degree);
+        weatherInfoText.setText(weatherInfo);
         weatherLayout.setVisibility(View.VISIBLE);//展示内容
+        swipeRefreshLayout.setRefreshing(false);//关闭下拉刷新.
         Intent intent = new Intent(this,AutoUpdateService.class);
         startService(intent);
     }
