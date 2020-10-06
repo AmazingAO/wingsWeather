@@ -1,5 +1,8 @@
 package com.example.wings_weather.gson.date_2_0;
-public class Now {
+
+import java.io.Serializable;
+
+public class Now  implements Serializable {
     public String fxDate;
     public String sunrise;
     public String sunset;

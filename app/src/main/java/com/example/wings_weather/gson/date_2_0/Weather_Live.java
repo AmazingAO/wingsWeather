@@ -1,8 +1,13 @@
 package com.example.wings_weather.gson.date_2_0;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.SerializedName;
 
-public class Weather_Live {
+import java.io.Serializable;
+
+public class Weather_Live implements Serializable {
     @SerializedName("obsTime")
     public String now_Time; //实况观测天气
 
@@ -57,4 +62,5 @@ public class Weather_Live {
     public String cloud;//实况云量
 
     public String dew;//实况露点温度
+
 }

@@ -46,7 +46,6 @@ import okhttp3.Response;
 
 public class WeatherActivity extends AppCompatActivity {
 
-    private Handler mHandler = new Handler();
 
     private ScrollView weatherLayout;
 
@@ -80,6 +79,8 @@ public class WeatherActivity extends AppCompatActivity {
 
     private Button navButton;
 
+    private String city_name;
+
 
 
     private int tag = 1;
@@ -111,6 +112,7 @@ public class WeatherActivity extends AppCompatActivity {
         carWashText = (TextView) findViewById(R.id.car_wash_text); // 洗车建议
         sportText = (TextView)findViewById(R.id.sport_text); //运动建议
 
+
         bingPicImg = (ImageView)findViewById(R.id.bing_pic_img);
 
         swipeRefreshLayout = (SwipeRefreshLayout)findViewById(R.id.swipe_refresh);
@@ -137,6 +139,7 @@ public class WeatherActivity extends AppCompatActivity {
         });
 
 
+
         String weatherString = pref.getString("weather",null);
         String weatherString_Live = pref.getString("weather_Live",null);
         String weatherString_3_Live = pref.getString("weather_Live_day3",null);
@@ -146,11 +149,14 @@ public class WeatherActivity extends AppCompatActivity {
             Weather_Live weather_Live = Utility.handleWeather_LiveResponse(weatherString_Live);
             Weather_day3 weather_day3 = Utility.handleWeatherDay3_LiveResponse(weatherString_3_Live);
             mWeatherId = weather.basic.weatherId;
+            city_name = weather.basic.cityName;
             showWeatherInfo(weather);
             showWeather_Live_Info(weather_Live);
             showWeatherDay3_Live_Info(weather_day3);
         }else {
-            mWeatherId = getIntent().getStringExtra("weather_id");
+            Intent intent = getIntent();
+            city_name = intent.getStringExtra("city_name");
+            mWeatherId = intent.getStringExtra("weather_id");
             weatherLayout.setVisibility(View.INVISIBLE);//请求数据时先将其内容展示隐藏.
             requestWeather(mWeatherId);
         }
@@ -159,6 +165,17 @@ public class WeatherActivity extends AppCompatActivity {
             public void onRefresh() {
                 requestWeather(mWeatherId);
                 loadBingPic();
+            }
+        });
+
+
+        degreeText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent  = new Intent(WeatherActivity.this,Weather_dayActivity.class);
+                intent.putExtra("weather_id",mWeatherId);
+                intent.putExtra("city_name",city_name);
+                startActivity(intent);
             }
         });
     }
@@ -284,6 +301,7 @@ public class WeatherActivity extends AppCompatActivity {
                             editor.putString("weather",responseText);
                             editor.apply();
                             mWeatherId  = weather.basic.weatherId;
+                            city_name = weather.basic.cityName;
                             requestWeather_Live(weatherId);
                             showWeatherInfo(weather);
                         }else {
