@@ -8,8 +8,9 @@ public class Now  implements Serializable {
     public String sunset;
     public String moonrise;
     public String moonset;
+    public String moonPhase;
     public String tempMax;
-    public String tempmin;
+    public String tempMin;
     public String iconDay;
     public String textDay;
     public String iconNight;
@@ -26,6 +27,7 @@ public class Now  implements Serializable {
     public String precip;
     public String pressure;
     public String vis;
+    public String cloud;
     public String uvIndex;
 
     @Override
@@ -37,7 +39,7 @@ public class Now  implements Serializable {
                 ", moonrise='" + moonrise + '\'' +
                 ", moonset='" + moonset + '\'' +
                 ", tempMax='" + tempMax + '\'' +
-                ", tempmin='" + tempmin + '\'' +
+                ", tempmin='" + tempMin + '\'' +
                 ", iconDay='" + iconDay + '\'' +
                 ", textDay='" + textDay + '\'' +
                 ", iconNight='" + iconNight + '\'' +

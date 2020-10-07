@@ -13,7 +13,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".Weather_dayActivity"></activity>
+        <activity android:name=".Weather_day3Activity"></activity>
+        <activity android:name=".Weather_dayActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

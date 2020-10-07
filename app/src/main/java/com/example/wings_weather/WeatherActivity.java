@@ -359,8 +359,8 @@ public class WeatherActivity extends AppCompatActivity {
      */
     private void showWeatherDay3_Live_Info(Weather_day3 weather){
         forecastLayout.removeAllViews();
-
-        for (Now forecast : weather.daily){
+        int size = 1;
+        for (final Now forecast : weather.daily){
             View view = LayoutInflater.from(this).inflate(R.layout.forecast_item,forecastLayout,false);
             TextView dateText = (TextView)view.findViewById(R.id.date_text);
             TextView infoText = (TextView)view.findViewById(R.id.info_text);
@@ -370,8 +370,20 @@ public class WeatherActivity extends AppCompatActivity {
             dateText.setText(forecast.fxDate);
             infoText.setText(forecast.textDay);
             maxText.setText(forecast.tempMax);
-            minText.setText(forecast.tempmin);
+            minText.setText(forecast.tempMin);
+
+            final int finalSize = size;
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(WeatherActivity.this,Weather_day3Activity.class);
+                    intent.putExtra("forecast",forecast);
+                    intent.putExtra("city_name",city_name);
+                    startActivity(intent);
+                }
+            });
             forecastLayout.addView(view);
+            size++;
         }
         weatherLayout.setVisibility(View.VISIBLE);//展示内容
         swipeRefreshLayout.setRefreshing(false);//关闭下拉刷新.
